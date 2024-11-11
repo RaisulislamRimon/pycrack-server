@@ -42,10 +42,12 @@
 # api/index.py
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from itertools import combinations_with_replacement
 import math
 
 app = Flask(__name__)
+CORS(app)
 
 def get_possible_shapes(num_elements, dimensions=2):
     factors = [i for i in range(1, num_elements + 1) if num_elements % i == 0]
