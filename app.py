@@ -49,6 +49,13 @@ import math
 app = Flask(__name__)
 CORS(app)
 
+
+
+@app.route('/')
+def home():
+    return "Hello, Flask server is running!"
+
+
 def get_possible_shapes(num_elements, dimensions=2):
     factors = [i for i in range(1, num_elements + 1) if num_elements % i == 0]
     valid_shapes = [
@@ -56,11 +63,6 @@ def get_possible_shapes(num_elements, dimensions=2):
         if math.prod(shape) == num_elements
     ]
     return valid_shapes
-
-
-@app.route('/')
-def home():
-    return "Hello, Flask server is running!"
 
 
 
