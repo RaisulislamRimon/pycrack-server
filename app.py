@@ -15,6 +15,12 @@ def get_possible_shapes(num_elements, dimensions):
     ]
     return valid_shapes
 
+
+@app.route('/')
+def home():
+    return "Hello, Flask server is running!"
+
+
 @app.route('/calculate-shapes', methods=['POST'])
 def calculate_shapes():
     data = request.get_json()
