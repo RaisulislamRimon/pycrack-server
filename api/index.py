@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify
-import math
 from itertools import combinations_with_replacement
-from vercel import Vercel
+import math
 
 app = Flask(__name__)
-vc = Vercel(app)
 
 def get_possible_shapes(num_elements, dimensions):
     factors = [i for i in range(1, num_elements + 1) if num_elements % i == 0]
