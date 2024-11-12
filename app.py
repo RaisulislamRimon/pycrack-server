@@ -1,53 +1,25 @@
-# from flask import Flask, request, jsonify
-# from itertools import combinations_with_replacement
-# import math
-
-# app = Flask(__name__)
-
-# def get_possible_shapes(num_elements, dimensions):
-#     # Get all factors of num_elements
-#     factors = [i for i in range(1, num_elements + 1) if num_elements % i == 0]
-
-#     # Generate possible factor combinations for the specified dimensions
-#     valid_shapes = [
-#         shape for shape in combinations_with_replacement(factors, dimensions)
-#         if math.prod(shape) == num_elements
-#     ]
-#     return valid_shapes
-
-
-# @app.route('/')
-# def home():
-#     return "Hello, Flask server is running!"
-
-
-# @app.route('/calculate-shapes', methods=['POST'])
-# def calculate_shapes():
-#     data = request.get_json()
-#     num_elements = data.get("num_elements")
-#     dimensions = data.get("dimensions")
-
-#     # Validate input
-#     if not num_elements or not dimensions:
-#         return jsonify({"error": "Please provide valid num_elements and dimensions"}), 400
-
-#     shapes = get_possible_shapes(num_elements, dimensions)
-#     return jsonify({"shapes": shapes})
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-
-
-# api/index.py
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from itertools import combinations_with_replacement
+import numpy as np
 import math
 
 app = Flask(__name__)
 CORS(app)
+
+def find_2d_shape(total_elements):
+    for i in range(1, int(math.sqrt(total_elements)) + 1):
+        if total_elements % i == 0:
+            return (i, total_elements // i)
+    return None
+
+def find_3d_shape(total_elements):
+    for i in range(1, int(total_elements ** (1/3)) + 1):
+        if total_elements % i == 0:
+            sub_total = total_elements // i
+            for j in range(1, int(math.sqrt(sub_total)) + 1):
+                if sub_total % j == 0:
+                    return (i, j, sub_total // j)
+    return None
 
 
 
@@ -56,29 +28,28 @@ def home():
     return "Hello, Flask server is running!"
 
 
-def get_possible_shapes(num_elements, dimensions=2):
-    factors = [i for i in range(1, num_elements + 1) if num_elements % i == 0]
-    valid_shapes = [
-        shape for shape in combinations_with_replacement(factors, dimensions)
-        if math.prod(shape) == num_elements
-    ]
-    return valid_shapes
-
-
-
-# @app.route('/api/calculate-shapes', methods=['POST'])
-@app.route('/calculate-shapes', methods=['POST'])
-def calculate_shapes():
+@app.route('/reshape', methods=['POST'])
+def reshape_array():
     data = request.get_json()
-    num_elements = data.get("num_elements")
-    dimensions = data.get("dimensions", 2)  # Default to 2D shapes if not provided
+    total_elements = data['total_elements']
 
-    if not num_elements or not isinstance(num_elements, int):
-        return jsonify({"error": "Please provide a valid integer for num_elements"}), 400
+    # Find 2D and 3D shapes
+    shape_2d = find_2d_shape(total_elements)
+    shape_3d = find_3d_shape(total_elements)
 
-    shapes = get_possible_shapes(num_elements, dimensions)
-    return jsonify({"shapes": shapes})
+    if not shape_2d or not shape_3d:
+        return jsonify({"error": "Cannot find suitable 2D or 3D shape for the given total elements"}), 400
 
-# Run the Flask app if executing this script directly
+    num = np.arange(total_elements)
+    reshaped_2d = num.reshape(shape_2d).tolist()
+    reshaped_3d = num.reshape(shape_3d).tolist()
+
+    return jsonify({
+        "reshaped_2d": reshaped_2d,
+        "reshaped_3d": reshaped_3d,
+        "shape_2d": shape_2d,
+        "shape_3d": shape_3d
+    })
+
 if __name__ == '__main__':
     app.run(debug=True)
